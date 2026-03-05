@@ -12,6 +12,7 @@ import math
 import cv2
 import numpy as np 
 import tensorflow as tf 
+import imageio.v2 as imageio
 from time import time 
 import sys 
 from PIL import Image 
@@ -24,7 +25,7 @@ gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.3)
 sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 
 model = Sat2GraphModel(sess, image_size=352, resnet_step = 8, batchsize = 1, channel = 12, mode = "test")
-model.restoreModel("../data/20citiesModel/model")
+model.restoreModel("tmptest_352_8__channel12/model300000")
 
 gt_prob_placeholder = np.zeros((1,352,352,14))
 gt_vector_placeholder = np.zeros((1,352,352,12))
@@ -43,11 +44,11 @@ snap_w = 50
 
 # run the model 
 
-sat_img = scipy.ndimage.imread(input_file)
-sat_img = scipy.misc.imresize(sat_img, (2048,2048)).astype(np.float)
+sat_img = imageio.imread(input_file)
+sat_img = cv2.resize(sat_img, (2048,2048)).astype(float)
 
 max_v = 255
-sat_img = (sat_img.astype(np.float)/ max_v - 0.5) * 0.9 
+sat_img = (sat_img.astype(float)/ max_v - 0.5) * 0.9 
 sat_img = sat_img.reshape((1,2048,2048,3))
 
 image_size = 352 
@@ -63,8 +64,8 @@ sat_img = np.pad(sat_img, ((0,0),(32,32),(32,32),(0,0)), 'constant')
 				
 
 t0 = time()
-for x in range(0,352*6-176-88,176/2):	
-	for y in range(0,352*6-176-88,176/2):
+for x in range(0,352*6-176-88,176//2):	
+	for y in range(0,352*6-176-88,176//2):
 
 		alloutputs  = model.Evaluate(sat_img[:,x:x+image_size, y:y+image_size,:], gt_prob_placeholder, gt_vector_placeholder, gt_seg_placeholder)
 		_output = alloutputs[1]
@@ -94,26 +95,14 @@ t0 = time()
 
 
 # vis 
-sat_img = scipy.ndimage.imread(input_file)
-sat_img = scipy.misc.imresize(sat_img, (2048,2048))
+sat_img = imageio.imread(input_file)
+sat_img = cv2.resize(sat_img, (2048,2048))
 
-for k,v in graph.iteritems():
+for k,v in graph.items():
 	n1 = k 
 	for n2 in v:
 		cv2.line(sat_img, (n1[1], n1[0]), (n2[1], n2[0]), (255,255,0),3)
 
 Image.fromarray(sat_img).save(output_file+"_vis.png")
-
-
-
-
-
-
-
-
-
-
-
-
 
 
