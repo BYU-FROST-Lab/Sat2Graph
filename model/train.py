@@ -289,7 +289,7 @@ with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
 
 	test_size = 32
 
-	for j in range(test_size/batch_size):
+	for j in range(test_size//batch_size):
 		input_sat, gt_prob, gt_vector, gt_seg= dataloader_test.getBatch(batch_size)
 		validation_data.append([np.copy(input_sat), np.copy(gt_prob), np.copy(gt_vector), np.copy(gt_seg)])
 
@@ -334,7 +334,7 @@ with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
 		t_train += time() - t0 			
 
 		if step % 10 == 0:
-			sys.stdout.write("\rbatch:%d "%step + ">>" * ((step - (step/200)*200)/10) + "--" * (((step/200+1)*200-step)/10))
+			sys.stdout.write("\rbatch:%d "%step + ">>" * ((step - (step//200)*200)//10) + "--" * (((step//200+1)*200-step)//10))
 			sys.stdout.flush()
 
 		if step > -1 and step % 200 == 0:
@@ -343,7 +343,7 @@ with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
 			if step % 1000 == 0 or (step < 1000 and step % 200 == 0):
 				test_loss = 0
 
-				for j in range(-1,test_size/batch_size):
+				for j in range(-1,test_size//batch_size):
 					if j >= 0:
 						input_sat, gt_prob, gt_vector, gt_seg = validation_data[j][0], validation_data[j][1], validation_data[j][2], validation_data[j][3]
 					if j == 0:
@@ -382,7 +382,7 @@ with tf.Session(config=tf.ConfigProto(gpu_options=gpu_options)) as sess:
 							#ImageGraphVis(gt_imagegraph[k,:,:,:].reshape((image_size, image_size, 2 + 4*max_degree )), validation_folder+"/tile%d_output_graph_gt.png" % (j*batch_size+k), thr=0.5, imagesize = image_size)
 
 
-				test_loss /= test_size/batch_size
+				test_loss /= test_size//batch_size
 				
 			print("")
 			print("step", step, "loss", sum_loss, "test_loss", test_loss, "prob_loss", sum_prob_loss/200.0, "vector_loss", sum_vector_loss/200.0, "seg_loss", sum_seg_loss/200.0)
